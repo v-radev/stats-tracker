@@ -8,5 +8,18 @@
 </head>
 <body>
 
+<a href="index.php" id="pageRefresh" class="clickable">Refresh</a>
+
+<script type="text/javascript">
+
+    var stats = new Stats();
+
+    stats.track();
+
+    window.addEventListener("beforeunload", function(){
+        stats.write();
+    });
+
+</script>
 </body>
 </html>
