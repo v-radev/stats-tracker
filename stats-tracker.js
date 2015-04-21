@@ -16,6 +16,7 @@ var Stats = function(){
 
     this.timeEnabled = true;
     this.linksEnabled = true;
+    this.mouseEnabled = true;
 
     this.ignoreLinks = [];
     this.trackOnlyLinks = [];
@@ -48,7 +49,17 @@ Stats.prototype.track = function(){
         self.trackTime();
     }
 
+    if ( self.mouseEnabled ){
+        self.trackMouse();
+    }
+
     //TODO areas, hovers, mouse x and y, elements hovered, track custom elements hover, etc.
+};
+
+Stats.prototype.addData = function( data ){
+    //TODO this data should be array? or json?
+    //And I should validate it somehow that is a valid json or array or object
+    //And add to the this.data object
 };
 
 Stats.prototype.trackLinks = function(){
@@ -60,10 +71,10 @@ Stats.prototype.trackLinks = function(){
         var $this     = jQuery(this),
             linkClass = $this.attr('class'),
             linkData  = {
-                linkId: $this.attr('id'),
+                linkId:    $this.attr('id'),
                 linkClass: linkClass,
-                url: $this.attr('href'),
-                text: $this.text()
+                url:       $this.attr('href'),
+                text:      $this.text()
             };
 
         if ( self.trackOnlyLinks.length ){
@@ -82,7 +93,33 @@ Stats.prototype.trackLinks = function(){
     });
 };
 
-
 Stats.prototype.trackTime = function(){
     this.startTime = new Date().getTime();
+};
+
+Stats.prototype.trackMouse = function(){
+    //TODO on mouse move add pageX and pageY to an object or array the +-5 summarize
+
+    //TODO add some divs for test
+    //Get only the id and the class of the element alto the element type
+    //Make some array of ignored classes
+
+    var moveCounter = 0,
+        summarizeMoves = 10;
+
+    jQuery(document).on('mouseover', function(e) {
+
+        moveCounter++;
+
+        console.log( $(e.target).attr('class') );//TODO
+
+        //If class and id is undefined do not log this mouseover
+        //And decrease the counter
+
+        if ( moveCounter >= summarizeMoves ){
+            //TODO summarize by element id then by class where the id is undefined
+            //But when you summarize the ids there would only be left classes
+            moveCounter = 0;
+        }
+    });
 };
