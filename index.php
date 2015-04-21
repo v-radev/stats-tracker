@@ -9,6 +9,9 @@
 <body>
 
 <a href="index.php" id="pageRefresh" class="clickable">Refresh</a>
+<a href="index.php" id="goLink" class="ignore">Go</a>
+<a href="index.php" id="returnLink" class="only">Return</a>
+<a href="index.php" id="backLink" class="only">Back</a>
 
 <script type="text/javascript">
 

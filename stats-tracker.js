@@ -2,15 +2,38 @@
  * Statistics tracking functions
  * @author V.Radev <mail@radev.info>
  */
+
+//TODO have to able to pass custom params to this.data like user_id, category, etc.
+
 var Stats = function(){
+    this.startTime = null;
+
+    this.data = {
+        date: Date(),
+        time: null,
+        clicked: []
+    };
+
     this.timeEnabled = true;
     this.linksEnabled = true;
+
+    this.ignoreLinks = [];
+    this.trackOnlyLinks = [];
+
     return this;
 };
 
 Stats.prototype.write = function(){
     //TODO add data to object, with default values and overwrite them in the methods and then send this object with ajax
-    console.log( 'Record statistics' );//TODO
+
+    var self = this;
+
+    //Measure time on page in seconds
+    if ( self.timeEnabled ){
+        self.data.time = parseInt( (new Date().getTime() - self.startTime) / 1000 );
+    }
+
+    console.log( self.data );//TODO
 };
 
 Stats.prototype.track = function(){
@@ -25,28 +48,41 @@ Stats.prototype.track = function(){
         self.trackTime();
     }
 
-
-    //TODO time, areas, links, hovers, mouse x and y, elements hovered, track custom elements hover, etc.
+    //TODO areas, hovers, mouse x and y, elements hovered, track custom elements hover, etc.
 };
 
 Stats.prototype.trackLinks = function(){
 
-    $(document).on('click', 'a', function(e) {
-        //TODO add this link to array of clicked
+    var self = this;
 
-        //Make some way of whitelist or blacklist with class
-        console.log($(this).attr('id'));//TODO
-        console.log($(this).attr('class'));//TODO
+    jQuery(document).on('click', 'a', function(e) {
+
+        var $this     = jQuery(this),
+            linkClass = $this.attr('class'),
+            linkData  = {
+                linkId: $this.attr('id'),
+                linkClass: linkClass,
+                url: $this.attr('href'),
+                text: $this.text()
+            };
+
+        if ( self.trackOnlyLinks.length ){
+            //If link is in tracked
+            if ( self.trackOnlyLinks.indexOf(linkClass) > -1 ){
+                self.data.clicked.push(linkData);
+            }
+            return;//Do not track other links
+
+        } else if ( self.ignoreLinks.length ) {
+            //If link has to be ignored
+            if ( self.ignoreLinks.indexOf(linkClass) > -1 ){ return; }
+        }
+
+        self.data.clicked.push(linkData);
     });
 };
 
 
 Stats.prototype.trackTime = function(){
-    //TODO track time
+    this.startTime = new Date().getTime();
 };
-
-
-//TODO check these
-//{"id":"4216729","module":"frontend","controller":"index","action":"index","params":"a:3:{s:6:\"module\";s:8:\"frontend\";s:10:\"controller\";s:5:\"index\";s:6:\"action\";s:5:\"index\";}","url":"/frontend/","session_id":"jjpdcqtganeg1jvk0hjit0lc36","visitor_id":"1","user_id":null,"visual_id":null,"content_id":null,"invitation_id":null,"basket_id":null,"entered":"2015-04-20 11:27:28","left":null,"duration":"0","os":"Ubuntu","browser":"Firefox 33.0","resolution":"1920x1080"}
-
-//{"id":"4216730","module":"frontend","controller":"view","action":"info-press","params":"a:4:{s:6:\"module\";s:8:\"frontend\";s:10:\"controller\";s:4:\"view\";s:6:\"action\";s:10:\"info-press\";s:2:\"id\";s:4:\"1822\";}","url":"/frontend/view/info-press/id/1822/","session_id":"jjpdcqtganeg1jvk0hjit0lc36","visitor_id":"1","user_id":null,"visual_id":null,"content_id":null,"invitation_id":null,"basket_id":null,"entered":"2015-04-20 11:27:44","left":null,"duration":"0","os":"Ubuntu","browser":"Firefox 33.0","resolution":"1920x1080"}
