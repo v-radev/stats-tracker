@@ -13,6 +13,22 @@
 <a href="index.php" id="returnLink" class="only">Return</a>
 <a href="index.php" id="backLink" class="only">Back</a>
 
+<br/><br/>
+
+<div style="background:blue;">Some text here</div>
+
+<br/>
+
+<div id="incredibleDiv" style="background:blue;">Element</div>
+
+<br/>
+
+<div id="awesomeDiv" class="cool" style="background:blue;">Element</div>
+
+<br/>
+
+<div class="cool" style="background:blue;">Another element</div>
+
 <script type="text/javascript">
 
     var stats = new Stats();
