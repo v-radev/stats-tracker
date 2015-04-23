@@ -12,8 +12,11 @@ var Stats = function(){
     this.data = {
         date: Date(),
         time: null,
-        clicked: []
+        clicked: [],
+        mouse: []
     };
+
+    this.mouseoverData = [];
 
     this.timeEnabled = true;
     this.linksEnabled = true;
@@ -39,6 +42,11 @@ Stats.prototype.write = function(){
     //Measure time on page in seconds
     if ( self.timeEnabled ){
         self.data.time = parseInt( (new Date().getTime() - self.startTime) / 1000 );
+    }
+    //Mouse movements
+    if ( self.mouseEnabled ){
+        self.summarizeMouseOvers();
+        self.data.mouse = self.mouseoverData;
     }
 
     console.log( self.data );//TODO
@@ -107,44 +115,27 @@ Stats.prototype.trackTime = function(){
 Stats.prototype.trackMouse = function(){
 
     var self = this,
-        moveCounter = 0,
-        summarizeMoves = 10,
-        elmnt,
-        elmntId,
-        elmntTag;
-
-    //TODO
-    self.mouseoverTime = new Date().getTime();
+        elmntData,
+        elmnt;
 
     jQuery(document).on('mouseover', function(e) {
 
-        moveCounter++;
+        elmntData = {};
 
         elmnt = jQuery(e.target);
-        elmntId = elmnt.attr('id');
-        elmntTag = elmnt.prop('tagName');
+        elmntData.id = elmnt.attr('id');
+        elmntData.class = elmnt.attr('class');
+        elmntData.tag = elmnt.prop('tagName');
 
         //If element has no id
-        if ( typeof elmntId == 'undefined' ){
-            moveCounter--;
-            return;
-        }
-
-        //Maybe track the time the user is on the element?
-        //And in the summarizing delete below 2s?
+        if ( typeof elmntData.id == 'undefined' ){ return; }
 
         //Record move
-        self.recordMouseOver(elmnt.attr('class'), elmntTag);
-
-        //Summarize data by element
-        if ( moveCounter >= summarizeMoves ){
-            self.summarizeMouseOvers();
-            moveCounter = 0;
-        }
+        self.recordMouseOver( elmntData );
     });
 };
 
-Stats.prototype.recordMouseOver = function( itemClass, itemType ){
+Stats.prototype.recordMouseOver = function( data ){
 
     var self = this;
 
@@ -152,33 +143,53 @@ Stats.prototype.recordMouseOver = function( itemClass, itemType ){
     if ( self.ignoreMouseClasses.length || self.ignoreMouseElements.length ){
         //Ignore by type or by class
         if (
-            self.ignoreMouseClasses.indexOf(itemClass) > -1 ||
-            self.ignoreMouseElements.indexOf(itemType) > -1
+            self.ignoreMouseClasses.indexOf(data.class) > -1 ||
+            self.ignoreMouseElements.indexOf(data.tag) > -1
         ){ return; }
     }
 
+    if (typeof(data.class) == 'undefined'){ data.class = ''; }
+    if (typeof(data.id) == 'undefined'){ data.id = ''; }
+
     //Track
-    if ( self.whitelistMouseClasses.length || self.whitelistMouseElements ){
+    if ( self.whitelistMouseClasses.length || self.whitelistMouseElements.length ){
         //If link is in tracked
         if (
-            self.whitelistMouseClasses.indexOf(itemClass) > -1 ||
-            self.whitelistMouseElements.indexOf(itemType) > -1
+            self.whitelistMouseClasses.indexOf(data.class) > -1 ||
+            self.whitelistMouseElements.indexOf(data.tag) > -1
         ){
-            //TODO track
+            self.mouseoverData.push(data);
         }
     } else {
-        //TODO track
+        self.mouseoverData.push(data);
     }
 };
 
 Stats.prototype.summarizeMouseOvers = function(){
 
-    //TODO summarize by element id then by class where the id is undefined
-    //But when you summarize the ids there would only be left classes
+    var self = this,
+        data = {},
+        i,
+        obj,
+        keyName;
 
-    //I should have an object where I record and one where I summarize
-    //The trick will be to handle the first time when the sumObj is empty
-    //Also when I sum after the first I should add to the num mouseovers in the sumObj
-    //And if an element is not there I should add it
+    for (i = 0; i < self.mouseoverData.length; i++) {
+        obj = self.mouseoverData[i];
 
+        if ( !obj.id ){
+            keyName = obj.tag +'.'+ obj.class;
+        } else if ( !obj.class ) {
+            keyName = obj.tag +'#'+ obj.id;
+        } else {
+            keyName = obj.tag +'#'+ obj.id +'.'+ obj.class;
+        }
+
+        if ( data.hasOwnProperty(keyName) ){
+            data[keyName] += 1;
+        } else {
+            data[keyName] = 1;
+        }
+    }
+
+    self.mouseoverData = data;
 };
