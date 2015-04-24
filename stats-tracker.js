@@ -2,12 +2,8 @@
  * Statistics tracking functions
  * @author V.Radev <mail@radev.info>
  */
-
-//TODO have to able to pass custom params to this.data like user_id, category, etc.
-
 var Stats = function(){
     this.startTime = null;
-    this.mouseoverTime = null;
 
     this.data = {
         date: Date(),
@@ -35,7 +31,6 @@ var Stats = function(){
 };
 
 Stats.prototype.write = function(){
-    //TODO add data to object, with default values and overwrite them in the methods and then send this object with ajax
 
     var self = this;
 
@@ -50,6 +45,12 @@ Stats.prototype.write = function(){
     }
 
     console.log( self.data );//TODO
+
+    jQuery.ajax({
+        method: 'POST',
+        url: 'request.php',
+        data: self.data
+    });
 };
 
 Stats.prototype.track = function(){
@@ -67,12 +68,11 @@ Stats.prototype.track = function(){
     if ( self.mouseEnabled ){
         self.trackMouse();
     }
-
-    //TODO areas, hovers, mouse x and y, elements hovered, track custom elements hover, etc.
 };
 
+//Add custom data to be send with the stats (user id, IP, etc.)
 Stats.prototype.addData = function( data ){
-    //TODO this data should be array? or json?
+    //This data should be array? or json?
     //And I should validate it somehow that is a valid json or array or object
     //And add to the this.data object
 };
